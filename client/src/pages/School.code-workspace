@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"name": "Module-Projects",
+			"path": "..\\..\\..\\.."
+		},
+		{
+			"name": "Weekly-Challenges",
+			"path": "..\\..\\..\\..\\..\\Weekly-Challenges"
+		},
+		{
+			"name": "test-bench",
+			"path": "..\\..\\..\\..\\..\\test-bench"
+		}
+	],
+	"settings": {
+	}
+}
