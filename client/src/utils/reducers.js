@@ -1,79 +1,63 @@
-import { useReducer } from 'react';
-import {
-    UPDATE_PRODUCTS,
-    UPDATE_CATEGORIES,
-    UPDATE_CURRENT_CATEGORY,
-    ADD_TO_CART,
-    ADD_MULTIPLE_TO_CART,
-    REMOVE_FROM_CART,
-    UPDATE_CART_QUANTITY,
-    CLEAR_CART,
-    TOGGLE_CART
-} from './actions';
-
-export const reducer = (state, action) => {
-    switch (action.type) {
-        case UPDATE_PRODUCTS:
-            return {
-                ...state,
-                products: [...action.products]
-            };
-        case UPDATE_CATEGORIES:
-            return {
-                ...state,
-                categories: [...action.categories]
-            };
-        case UPDATE_CURRENT_CATEGORY:
-            return {
-                ...state,
-                currentCategory: action.currentCategory
-            };
-        case ADD_TO_CART:
-            return {
-                ...state,
-                cartOpen: true,
-                cart: [...state.cart, action.product]
-            };
-        case ADD_MULTIPLE_TO_CART:
-            return {
-                ...state,
-                cartOpen: true,
-                cart: [...state.cart, ...action.products]
-            };
-        case REMOVE_FROM_CART:
-            let newState = state.cart.filter(product => product._id !== action._id);
-            return {
-                ...state,
-                cartOpen: newState.length > 0,
-                cart: newState
-            };
-        case UPDATE_CART_QUANTITY:
-            return {
-                ...state,
-                cartOpen: true,
-                cart: state.cart.map(product => {
-                    if (action._id === product._id) {
-                        product.purchaseQuantity = action.purchaseQuantity;
-                    }
-                    return product;
-                })
-            };
-        case CLEAR_CART:
-            return {
-                ...state,
-                cartOpen: false,
-                cart: []
-            };
-        case TOGGLE_CART:
-            return {
-                ...state,
-                cartOpen: !state.cartOpen
-            };
-        default:
-            return state;
+import { createSlice } from '@reduxjs/toolkit';
+export const reduxSlice = createSlice({
+    name: 'global',
+    initialState: {
+        products: [],
+        cart: [],
+        cartOpen: false,
+        categories: [],
+        currentCategory: ''
+    },
+    reducers: {
+        r_UPDATE_PRODUCTS: (state, { payload }) => {
+            state.products = payload;
+        },
+        r_UPDATE_CATEGORIES: (state, { payload }) => {
+            state.categories = payload;
+        },
+        r_UPDATE_CURRENT_CATEGORY: (state, { payload }) => {
+            state.currentCategory = payload;
+        },
+        r_ADD_TO_CART: (state, { payload }) => {
+            state.cartOpen = true;
+            state.cart = [...state.cart, payload]
+        },
+        r_ADD_MULTIPLE_TO_CART: (state, { payload }) => {
+            state.cartOpen = true;
+            state.cart = [...state.cart, ...payload];
+        },
+        r_REMOVE_FROM_CART: (state, { payload }) => {
+            let newState = state.cart.filter(product => product._id !== payload);
+            state.cartOpen = newState.length > 0;
+            state.cart = newState;
+        },
+        r_UPDATE_CART_QUANTITY: (state, { payload }) => {
+            state.cartOpen = true;
+            state.cart = state.cart.map(product => {
+                if (payload._id === product._id) {
+                    product.purchaseQuantity = payload.quantity;
+                }
+                return product;
+            });
+        },
+        r_CLEAR_CART: (state, { payload }) => {
+            state.cartOpen = false;
+            state.cart = [];
+        },
+        r_TOGGLE_CART: (state) => {
+            state.cartOpen = !state.cartOpen;
+        }
     }
-};
+});
 
-export function useProductReducer(initialState) {
-    return useReducer(reducer, initialState);
-}
+export const {
+    r_UPDATE_PRODUCTS,
+    r_UPDATE_CATEGORIES,
+    r_UPDATE_CURRENT_CATEGORY,
+    r_ADD_TO_CART,
+    r_ADD_MULTIPLE_TO_CART,
+    r_REMOVE_FROM_CART,
+    r_UPDATE_CART_QUANTITY,
+    r_CLEAR_CART,
+    r_TOGGLE_CART
+} = reduxSlice.actions;

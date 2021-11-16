@@ -4,10 +4,10 @@ import CartItem from '../CartItem';
 
 import Auth from '../../utils/auth';
 
-import { useStoreContext } from '../../utils/GlobalState';
-
 import React, { useEffect } from 'react';
-import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from "../../utils/actions";
+
+import { useSelector, useDispatch } from 'react-redux';
+import { r_TOGGLE_CART, r_ADD_MULTIPLE_TO_CART } from '../../utils/reducers';
 
 import { idbPromise } from '../../utils/helpers';
 
@@ -19,14 +19,16 @@ import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
 const Cart = () => {
-    const [state, dispatch] = useStoreContext();
+    const cart = useSelector(({ global }) => global.cart);
+    const cartOpen = useSelector(({ global }) => global.cartOpen);
+    const dispatch = useDispatch();
     const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
 
-    function toggleCart() { dispatch({ type: TOGGLE_CART }) };
+    function toggleCart() { dispatch(r_TOGGLE_CART()) };
 
     function calculateTotal() {
         let sum = 0;
-        state.cart.forEach(item => {
+        cart.forEach(item => {
             sum += item.price * item.purchaseQuantity
         });
         return sum.toFixed(2);
@@ -34,7 +36,7 @@ const Cart = () => {
 
     function submitCheckout() {
         const productIds = [];
-        state.cart.forEach(item => {
+        cart.forEach(item => {
             for (let i = 0; i < item.purchaseQuantity; i++) {
                 productIds.push(item._id)
             };
@@ -46,15 +48,15 @@ const Cart = () => {
 
     useEffect(() => {
         async function getCart() {
-            const cart = await idbPromise('cart', 'get');
-            if (cart.length) {
-                dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+            const dbcart = await idbPromise('cart', 'get');
+            if (dbcart.length) {
+                dispatch(r_ADD_MULTIPLE_TO_CART(dbcart));
             };
         };
-        if (!state.cart.length) {
+        if (!cart.length) {
             getCart();
         }
-    }, [state.cart.length, dispatch]);
+    }, [cart.length, dispatch]);
 
     useEffect(() => {
         if (data) {
@@ -62,7 +64,7 @@ const Cart = () => {
         }
     }, [data]);
 
-    if (!state.cartOpen) {
+    if (!cartOpen) {
         return (
             <div className="cart-closed" onClick={toggleCart}>
                 <span
@@ -78,9 +80,9 @@ const Cart = () => {
         <div className="cart">
             <div className="close" onClick={toggleCart}>[close]</div>
             <h2>Shopping Cart</h2>
-            {state.cart.length ? (
+            {cart.length ? (
                 <div>
-                    {state.cart.map(item => (
+                    {cart.map(item => (
                         <CartItem key={item._id} item={item} />
                     ))}
                     <div className="flex-row space-between">
